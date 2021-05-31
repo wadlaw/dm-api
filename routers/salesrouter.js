@@ -91,6 +91,12 @@ salesRouter.get('/categorised/thismonth', categorisedThisMonthSQL, (req, res, ne
 salesRouter.get('/categorised/lastmonth', categorisedLastMonthSQL, (req, res, next) => {
     getResults(req, res, next, "categories")
 })
+salesRouter.get('/categorised/bymonths', categorisedMonthlySQL, (req, res, next) => {
+    getResults(req, res, next, "categories")
+})
+salesRouter.get('/categorised/byyears', categorisedYearlySQL, (req, res, next) => {
+    getResults(req, res, next, "categories")
+})
 
 
 function itemSQL(req, res, next) {
