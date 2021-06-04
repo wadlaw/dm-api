@@ -1,4 +1,6 @@
 const salesRouter = require('express').Router();
+const json2csv = require('json2csv').parse;
+const json2xls = require('json2xls');
 module.exports = salesRouter;
 
 const dbPath = process.env.DATABASE || '../database/db.sqlite';
@@ -6,6 +8,7 @@ const sqlite = require('sqlite3');
 const db = new sqlite.Database(dbPath);
 
 salesRouter.use(checkAuthed)
+salesRouter.use(json2xls.middleware);
 
 salesRouter.param('fromDate', (req, res, next, id) => {
     console.log('from param');
@@ -249,12 +252,31 @@ function getResults(req, res, next, entity) {
                 next(err);
             } else {
                 let results = { };
-                results[entity] = rows;
-                res.json(results);
+                if (req.query.csv) {
+                    returnCSV(req, res, rows);
+                } else if (req.query.xls) {
+                    returnExcel(req, res, rows);
+                } else {
+                    results[entity] = rows;
+                    res.json(results);
+                }
+                
             }
         }
     )
 }
+function returnCSV(req, res, results) {
+    const csvString = json2csv(results);
+    res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+    res.set('Content-Type', 'text/csv');
+    res.status(200).send(csvString)
+}
+
+function returnExcel(req, res, results) {
+    res.xls('data.xlsx', results);
+}
+
+
 
 function checkAuthed(req, res, next) {
     console.log('checkAuthed is running');
